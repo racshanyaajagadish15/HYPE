@@ -1,0 +1,15 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e26]:
+      - generic [ref=e27] [cursor=pointer]
+      - generic [ref=e28] [cursor=pointer]
+    - generic [ref=e40]:
+      - img "WhatsApp Image 2026-09-17 at 1.39.11 PM.jpeg" [ref=e42]
+      - paragraph [ref=e43]: City nights with the crew
+    - generic [ref=e33]:
+      - button "← Back" [ref=e34] [cursor=pointer]
+      - link "Exit" [ref=e35] [cursor=pointer]:
+        - /url: /wrapped/2026-09
+      - button "Next →" [active] [ref=e36] [cursor=pointer]
+  - button "Open Next.js Dev Tools" [ref=e10] [cursor=pointer]
+  - alert [ref=e37]

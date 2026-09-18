@@ -15,7 +15,19 @@ function monthFile(month) {
 
 export function readMonth(month) {
   const file = monthFile(month);
-  if (!existsSync(file)) return { month, photos: [], music: null, narrative: null, coverPhotoId: null, montagePath: null };
+  if (!existsSync(file))
+    return {
+      month,
+      photos: [],
+      music: null,
+      narrative: null,
+      coverPhotoId: null,
+      moments: [],
+      moods: [],
+      montagePath: null,
+      montageStatus: "idle",
+      montageError: null,
+    };
   return JSON.parse(readFileSync(file, "utf8"));
 }
 

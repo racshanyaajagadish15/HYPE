@@ -1,0 +1,284 @@
+.stage {
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+  background-color: #f7f3ea;
+  background-image: radial-gradient(#0000001f 1.6px, transparent 1.6px);
+  background-size: 24px 24px;
+  color: #171512;
+  display: flex;
+  flex-direction: column;
+}
+
+.progressRow {
+  display: flex;
+  gap: 6px;
+  padding: 14px 14px 0;
+}
+
+.progressSeg {
+  flex: 1;
+  height: 5px;
+  border-radius: 999px;
+  background: #17151230;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  width: 0%;
+  background: #171512;
+  border-radius: 999px;
+  transition: width 0.25s linear;
+}
+
+.tapZones {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  z-index: 5;
+}
+
+.tapZone {
+  flex: 1;
+  cursor: pointer;
+}
+
+.content {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  gap: 16px;
+}
+
+/* Handwritten headline, marker-underlined rather than filled with color —
+   this is the "more black and white" pass: ink on paper, not comic-book fill. */
+.headline {
+  font-family: var(--font-caveat);
+  font-weight: 700;
+  color: #171512;
+  line-height: 1.05;
+  animation: popIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.headlineXl {
+  font-size: clamp(3rem, 15vw, 5.5rem);
+}
+
+.headlineLg {
+  font-size: clamp(2.4rem, 11vw, 3.8rem);
+}
+
+.headlineMd {
+  font-size: clamp(2rem, 9vw, 2.8rem);
+}
+
+.body {
+  font-family: var(--font-kalam);
+  font-weight: 400;
+  font-size: clamp(1rem, 4.5vw, 1.25rem);
+  max-width: 42ch;
+  animation: floatUp 0.5s ease-out 0.15s both;
+}
+
+.mark {
+  background: linear-gradient(180deg, transparent 58%, #ffe066 58%, #ffe066 92%, transparent 92%);
+  padding: 0 2px;
+}
+
+/* Hand-drawn frame: irregular corner radii + slight rotation instead of a
+   perfect rectangle, doubled with a ::before "second sketchy stroke" for a
+   drawn-twice pencil look. */
+.card {
+  position: relative;
+  background: #fffdf7;
+  color: #171512;
+  border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+  padding: 22px;
+  border: 3px solid #171512;
+  transform: rotate(-0.6deg);
+  animation: popIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+  max-width: min(88vw, 420px);
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border: 2px solid #17151255;
+  border-radius: 15px 225px 15px 255px/225px 15px 255px 15px;
+  transform: rotate(1.1deg);
+  z-index: -1;
+}
+
+.photoWrap {
+  position: relative;
+  animation: popIn 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  border: 4px solid #171512;
+  border-radius: 18px 4px 18px 4px/4px 18px 4px 18px;
+  transform: rotate(-1.2deg);
+  overflow: hidden;
+  max-width: min(80vw, 380px);
+  max-height: 48vh;
+  background: #171512;
+}
+
+.photoWrap img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.tape {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-3deg);
+  width: 90px;
+  height: 28px;
+  background: #ffe066cc;
+  border: 1px solid #17151244;
+  z-index: 3;
+}
+
+.caption {
+  font-family: var(--font-kalam);
+  font-weight: 700;
+  font-size: clamp(1.05rem, 5vw, 1.4rem);
+  color: #171512;
+  padding: 6px 4px;
+  animation: floatUp 0.5s ease-out 0.2s both;
+}
+
+.eyebrow {
+  font-family: var(--font-kalam);
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  border: 2px solid #171512;
+  border-radius: 999px;
+  padding: 6px 16px;
+  animation: floatUp 0.4s ease-out both;
+}
+
+.moodGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  max-width: 340px;
+  animation: floatUp 0.5s ease-out 0.15s both;
+}
+
+.moodTag {
+  font-family: var(--font-kalam);
+  font-weight: 700;
+  font-size: 1rem;
+  background: #fffdf7;
+  border: 2.5px solid #171512;
+  border-radius: 999px;
+  padding: 8px 16px;
+  transform: rotate(var(--tilt, -2deg));
+}
+
+.controls {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  padding: 0 16px 22px;
+}
+
+.btn {
+  font-family: var(--font-kalam);
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: 2.5px solid #171512;
+  background: #fffdf7;
+  color: #171512;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.btn:hover {
+  transform: rotate(-2deg) scale(1.03);
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btnPrimary {
+  background: #171512;
+  color: #fffdf7;
+}
+
+.btnGhost {
+  background: transparent;
+  border-color: #17151280;
+}
+
+.spotifyEmbed {
+  width: min(88vw, 380px);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 3px solid #171512;
+  animation: floatUp 0.5s ease-out 0.25s both;
+}
+
+.doodle {
+  position: absolute;
+  z-index: 1;
+  opacity: 0.55;
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0) rotate(-6deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08) rotate(2deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+
+.wiggle {
+  animation: wiggle 1.6s ease-in-out infinite;
+}

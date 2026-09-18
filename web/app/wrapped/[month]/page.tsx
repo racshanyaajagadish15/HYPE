@@ -13,7 +13,10 @@ type MonthRecord = {
   music: { topTracks: Track[]; topArtists: Artist[] } | null;
   narrative: string | null;
   coverPhotoId: string | null;
+  moments: { id: string; caption: string }[];
   montagePath: string | null;
+  montageStatus: "idle" | "processing" | "done" | "error";
+  montageError: string | null;
 };
 
 export default function MonthDetail() {
@@ -22,12 +25,16 @@ export default function MonthDetail() {
   const [busy, setBusy] = useState<string>("");
   const [error, setError] = useState("");
   const pollRef = useRef<ReturnType<typeof setInterval>>();
+  const montagePollRef = useRef<ReturnType<typeof setInterval>>();
 
   const load = () => fetch(`/api/months/${month}`).then((r) => r.json()).then(setRecord);
 
   useEffect(() => {
     load();
-    return () => clearInterval(pollRef.current);
+    return () => {
+      clearInterval(pollRef.current);
+      clearInterval(montagePollRef.current);
+    };
   }, [month]);
 
   async function run(label: string, fn: () => Promise<Response>) {
@@ -71,6 +78,30 @@ export default function MonthDetail() {
     }
   }
 
+  async function generateMontage() {
+    setBusy("montage");
+    setError("");
+    try {
+      const res = await fetch(`/api/months/${month}/montage`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || res.statusText);
+      setRecord(data);
+
+      montagePollRef.current = setInterval(async () => {
+        const r = await fetch(`/api/months/${month}`).then((r) => r.json());
+        if (r.montageStatus === "done" || r.montageStatus === "error") {
+          clearInterval(montagePollRef.current);
+          setRecord(r);
+          setBusy("");
+          if (r.montageStatus === "error") setError(r.montageError || "Montage generation failed");
+        }
+      }, 3000);
+    } catch (err: any) {
+      setError(err.message);
+      setBusy("");
+    }
+  }
+
   async function share() {
     const res = await fetch(`/api/months/${month}/montage`);
     const blob = await res.blob();
@@ -94,6 +125,15 @@ export default function MonthDetail() {
         </Link>
       </div>
 
+      {record.moments.length > 0 && record.narrative && (
+        <Link
+          href={`/wrapped/${month}/story`}
+          className="block mb-6 px-4 py-3 rounded bg-green-500 text-black font-semibold text-center hover:bg-green-400"
+        >
+          ✨ View Interactive Story
+        </Link>
+      )}
+
       {error && <p className="text-red-400 mb-4">Error: {error}</p>}
 
       <Step title="1. Photos" done={record.photos.length > 0}>
@@ -102,14 +142,19 @@ export default function MonthDetail() {
         </button>
         {record.photos.length > 0 && (
           <div className="grid grid-cols-4 gap-2 mt-3">
-            {record.photos.map((p) => (
-              <img
-                key={p.id}
-                src={`/api/months/${month}/photos/${p.id}`}
-                alt={p.filename}
-                className={`w-full h-20 object-cover rounded ${p.id === record.coverPhotoId ? "ring-2 ring-green-500" : ""}`}
-              />
-            ))}
+            {record.photos.map((p) => {
+              const moment = record.moments?.find((m) => m.id === p.id);
+              return (
+                <div key={p.id} className="relative">
+                  <img
+                    src={`/api/months/${month}/photos/${p.id}`}
+                    alt={p.filename}
+                    className={`w-full h-20 object-cover rounded ${p.id === record.coverPhotoId ? "ring-2 ring-green-500" : moment ? "ring-1 ring-zinc-500" : ""}`}
+                  />
+                  {moment?.caption && <p className="text-[10px] text-zinc-400 mt-0.5 truncate">{moment.caption}</p>}
+                </div>
+              );
+            })}
           </div>
         )}
       </Step>
@@ -149,15 +194,15 @@ export default function MonthDetail() {
         {record.narrative && <p className="mt-3 text-zinc-300 italic">{record.narrative}</p>}
       </Step>
 
-      <Step title="4. Montage" done={!!record.montagePath}>
+      <Step title="4. Montage" done={record.montageStatus === "done"}>
         <button
-          onClick={() => run("montage", () => fetch(`/api/months/${month}/montage`, { method: "POST" }))}
-          disabled={!!busy || record.photos.length === 0}
+          onClick={generateMontage}
+          disabled={!!busy || record.photos.length === 0 || record.montageStatus === "processing"}
           className="px-4 py-2 rounded bg-green-500 text-black font-semibold disabled:opacity-50"
         >
-          {busy === "montage" ? "Rendering (this can take a minute)..." : "Generate Montage"}
+          {record.montageStatus === "processing" ? "Rendering (this can take a few minutes)..." : "Generate Montage"}
         </button>
-        {record.montagePath && (
+        {record.montageStatus === "done" && record.montagePath && (
           <div className="mt-3 space-y-3">
             <video controls src={`/api/months/${month}/montage`} className="w-full max-w-[300px] rounded" />
             <div className="flex gap-2">
