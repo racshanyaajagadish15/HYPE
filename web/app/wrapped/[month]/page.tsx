@@ -14,9 +14,6 @@ type MonthRecord = {
   narrative: string | null;
   coverPhotoId: string | null;
   moments: { id: string; caption: string }[];
-  montagePath: string | null;
-  montageStatus: "idle" | "processing" | "done" | "error";
-  montageError: string | null;
 };
 
 export default function MonthDetail() {
@@ -25,16 +22,12 @@ export default function MonthDetail() {
   const [busy, setBusy] = useState<string>("");
   const [error, setError] = useState("");
   const pollRef = useRef<ReturnType<typeof setInterval>>();
-  const montagePollRef = useRef<ReturnType<typeof setInterval>>();
 
   const load = () => fetch(`/api/months/${month}`).then((r) => r.json()).then(setRecord);
 
   useEffect(() => {
     load();
-    return () => {
-      clearInterval(pollRef.current);
-      clearInterval(montagePollRef.current);
-    };
+    return () => clearInterval(pollRef.current);
   }, [month]);
 
   async function run(label: string, fn: () => Promise<Response>) {
@@ -75,42 +68,6 @@ export default function MonthDetail() {
     } catch (err: any) {
       setError(err.message);
       setBusy("");
-    }
-  }
-
-  async function generateMontage() {
-    setBusy("montage");
-    setError("");
-    try {
-      const res = await fetch(`/api/months/${month}/montage`, { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || res.statusText);
-      setRecord(data);
-
-      montagePollRef.current = setInterval(async () => {
-        const r = await fetch(`/api/months/${month}`).then((r) => r.json());
-        if (r.montageStatus === "done" || r.montageStatus === "error") {
-          clearInterval(montagePollRef.current);
-          setRecord(r);
-          setBusy("");
-          if (r.montageStatus === "error") setError(r.montageError || "Montage generation failed");
-        }
-      }, 3000);
-    } catch (err: any) {
-      setError(err.message);
-      setBusy("");
-    }
-  }
-
-  async function share() {
-    const res = await fetch(`/api/months/${month}/montage`);
-    const blob = await res.blob();
-    const file = new File([blob], `${month}-wrapped.mp4`, { type: "video/mp4" });
-    const nav = navigator as any;
-    if (nav.canShare?.({ files: [file] })) {
-      await nav.share({ files: [file], title: `${month} Wrapped` });
-    } else {
-      alert("This browser can't share files directly — use Download instead.");
     }
   }
 
@@ -192,29 +149,6 @@ export default function MonthDetail() {
           {busy === "narrative" ? "Asking Gemini..." : "Generate Narrative"}
         </button>
         {record.narrative && <p className="mt-3 text-zinc-300 italic">{record.narrative}</p>}
-      </Step>
-
-      <Step title="4. Montage" done={record.montageStatus === "done"}>
-        <button
-          onClick={generateMontage}
-          disabled={!!busy || record.photos.length === 0 || record.montageStatus === "processing"}
-          className="px-4 py-2 rounded bg-green-500 text-black font-semibold disabled:opacity-50"
-        >
-          {record.montageStatus === "processing" ? "Rendering (this can take a few minutes)..." : "Generate Montage"}
-        </button>
-        {record.montageStatus === "done" && record.montagePath && (
-          <div className="mt-3 space-y-3">
-            <video controls src={`/api/months/${month}/montage`} className="w-full max-w-[300px] rounded" />
-            <div className="flex gap-2">
-              <a href={`/api/months/${month}/montage`} download className="px-4 py-2 rounded bg-zinc-800 hover:bg-zinc-700">
-                Download
-              </a>
-              <button onClick={share} className="px-4 py-2 rounded bg-zinc-800 hover:bg-zinc-700">
-                Share
-              </button>
-            </div>
-          </div>
-        )}
       </Step>
     </div>
   );

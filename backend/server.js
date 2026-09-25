@@ -1,11 +1,10 @@
 import { createServer } from "node:http";
-import { createReadStream, existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { createReadStream, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { getRecentlyPlayed, getTopArtists, getTopTracks } from "./spotify/spotify.js";
 import { createSession, getSession, listAllMediaItems, getAccessToken } from "./google-photo-picker/photoPicker.js";
 import { readMonth, writeMonth, listMonths, PHOTOS_DIR } from "./months.js";
 import { generateNarrative, pickHighlights, generateMoods } from "./llm/index.js";
-import { buildMontage } from "./montage/buildMontage.js";
 
 const PORT = 3001;
 
@@ -130,32 +129,6 @@ createServer(async (req, res) => {
           topArtists: record.music?.topArtists ?? [],
         });
         return sendJson(res, 200, writeMonth(month, { narrative, coverPhotoId, moments, moods }));
-      }
-      if (parts.length === 4 && parts[3] === "montage") {
-        if (req.method === "POST") {
-          const record = readMonth(month);
-          if (record.photos.length === 0) return sendJson(res, 400, { error: "No photos selected for this month yet" });
-          if (record.montageStatus === "processing") return sendJson(res, 200, record);
-
-          // ffmpeg encoding can run well past typical proxy/client timeouts
-          // for a real photo count — run it in the background and let the
-          // frontend poll GET /api/months/:month, same pattern already used
-          // for the photo-picker session.
-          const processingRecord = writeMonth(month, { montageStatus: "processing", montageError: null });
-          buildMontage(record)
-            .then((montagePath) => writeMonth(month, { montagePath, montageStatus: "done" }))
-            .catch((err) => writeMonth(month, { montageStatus: "error", montageError: err.message }));
-          return sendJson(res, 202, processingRecord);
-        }
-        if (req.method === "GET") {
-          const record = readMonth(month);
-          if (!record.montagePath || !existsSync(record.montagePath)) return sendJson(res, 404, { error: "Montage not generated yet" });
-          res.writeHead(200, {
-            "Content-Type": "video/mp4",
-            "Content-Disposition": `attachment; filename="${month}-wrapped.mp4"`,
-          });
-          return createReadStream(record.montagePath).pipe(res);
-        }
       }
     }
 

@@ -8,7 +8,6 @@ type MonthRecord = {
   photos: any[];
   music: any;
   narrative: string | null;
-  montagePath: string | null;
 };
 
 function currentMonth() {
@@ -53,8 +52,7 @@ export default function WrappedIndex() {
             <Link href={`/wrapped/${m.month}`} className="flex items-center justify-between bg-zinc-800 rounded px-4 py-3 hover:bg-zinc-700">
               <span className="font-semibold">{m.month}</span>
               <span className="text-sm text-zinc-400">
-                {m.photos.length} photo(s) · {m.music ? "music ✓" : "music ✗"} · {m.narrative ? "narrative ✓" : "narrative ✗"} ·{" "}
-                {m.montagePath ? "montage ✓" : "montage ✗"}
+                {m.photos.length} photo(s) · {m.music ? "music ✓" : "music ✗"} · {m.narrative ? "narrative ✓" : "narrative ✗"}
               </span>
             </Link>
           </li>

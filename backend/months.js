@@ -24,9 +24,6 @@ export function readMonth(month) {
       coverPhotoId: null,
       moments: [],
       moods: [],
-      montagePath: null,
-      montageStatus: "idle",
-      montageError: null,
     };
   return JSON.parse(readFileSync(file, "utf8"));
 }

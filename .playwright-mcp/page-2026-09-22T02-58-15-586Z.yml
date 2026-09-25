@@ -1,0 +1,14 @@
+- generic [active] [ref=f6e1]:
+  - generic [ref=f6e2]:
+    - generic [ref=f6e3]:
+      - heading "Wrapped" [level=1] [ref=f6e4]
+      - link "← Data Viewer" [ref=f6e5] [cursor=pointer]:
+        - /url: /
+    - generic [ref=f6e6]:
+      - textbox [ref=f6e7]: 2026-09
+      - link "Open" [ref=f6e8] [cursor=pointer]:
+        - /url: /wrapped/2026-09
+    - list [ref=f6e9]:
+      - paragraph [ref=f6e10]: No months yet — pick one above to get started.
+  - button "Open Next.js Dev Tools" [ref=f6e16] [cursor=pointer]
+  - alert [ref=f6e20]
