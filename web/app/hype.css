@@ -1,0 +1,73 @@
+/* Shared shell for app pages — ported from designs/HYPE Builder.html */
+
+html:has(.hb-root),
+body:has(.hb-root) { margin: 0; padding: 0; background: #07060B; }
+
+/* the design has no CSS reset — undo Tailwind preflight's border-box */
+.hb-root, .hb-root *, .hb-root *::before, .hb-root *::after { box-sizing: content-box; }
+
+.hb-root {
+  --f-syne: var(--font-syne), 'Syne', sans-serif;
+  --f-mono: var(--font-dm-mono), 'DM Mono', monospace;
+  --f-body: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif;
+  position: relative; min-height: 100vh; width: 100%; background: #07060B; color: #F5F3FF;
+  font-family: var(--f-body); overflow-x: clip;
+}
+.hb-root a { color: #3DF5FF; text-decoration: none; }
+.hb-root a:hover { color: #FF4FD8; }
+.hb-root button { font-family: var(--f-body); }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes dotPulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+@keyframes eqb { 0%, 100% { transform: scaleY(.25); } 50% { transform: scaleY(1); } }
+@keyframes fillA { from { width: 0; } to { width: 100%; } }
+@keyframes fillB { from { width: 0; } to { width: 100%; } }
+@keyframes kenA { from { transform: scale(1.14) translate(-2%, 1%); opacity: 0; } 15% { opacity: 1; } to { transform: scale(1); opacity: 1; } }
+@keyframes kenB { from { transform: scale(1.14) translate(2%, -1%); opacity: 0; } 15% { opacity: 1; } to { transform: scale(1); opacity: 1; } }
+@keyframes capA { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+@keyframes capB { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+@keyframes sweepL { 0%, 100% { transform: rotate(-28deg); } 50% { transform: rotate(18deg); } }
+@keyframes sweepR { 0%, 100% { transform: rotate(28deg); } 50% { transform: rotate(-18deg); } }
+@keyframes ringOut { 0% { transform: translate(-50%, -50%) scale(.5); opacity: 0; } 15% { opacity: .6; } 100% { transform: translate(-50%, -50%) scale(2.4); opacity: 0; } }
+@keyframes spinRev { to { transform: rotate(-360deg); } }
+@keyframes corePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+@keyframes statA { from { opacity: 0; transform: translateY(14px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes statB { from { opacity: 0; transform: translateY(14px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes haze { 0%, 100% { opacity: .5; } 50% { opacity: .9; } }
+@keyframes pulseBtn { 0%, 100% { box-shadow: 0 0 0 0 rgba(255,79,216,.55), 0 0 30px rgba(255,79,216,.45); } 50% { box-shadow: 0 0 0 14px rgba(255,79,216,0), 0 0 50px rgba(255,79,216,.7); } }
+
+.hb-dots { position: fixed; inset: 0; pointer-events: none; opacity: .5; background-image: radial-gradient(rgba(245,243,255,.07) 1px, transparent 1px); background-size: 22px 22px; }
+.hb-ambient { position: fixed; left: 50%; top: -20vh; width: 120vw; height: 80vh; transform: translateX(-50%); pointer-events: none; transition: background .8s ease; }
+.hb-col { position: relative; max-width: 620px; margin: 0 auto; padding: 20px clamp(16px, 5vw, 28px) 48px; display: flex; flex-direction: column; gap: 28px; }
+.hb-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; }
+.hb-header img { display: block; height: 22px; width: auto; }
+
+.hb-h1 { margin: 0; font-family: var(--f-syne); font-weight: 800; font-size: clamp(36px, 9vw, 60px); line-height: 1.02; letter-spacing: -.035em; text-transform: uppercase; }
+.hb-accent { color: #FF4FD8; text-shadow: 0 0 24px rgba(255,79,216,.55); }
+.hb-lede { margin: 0; font-size: 17px; line-height: 1.5; color: #B9B4CC; max-width: 460px; text-wrap: pretty; }
+.hb-eyebrow { font-family: var(--f-mono); font-size: 12px; letter-spacing: .24em; text-transform: uppercase; color: #FFE14D; }
+.hb-note { font-family: var(--f-mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #8A849E; }
+
+/* source / list card */
+.hb-card { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 16px 16px 16px 18px; border-radius: 20px; background: #100E18; border: 1px solid rgba(245,243,255,.1); transition: border-color .4s ease, box-shadow .4s ease; }
+.hb-tile { position: relative; width: 52px; height: 52px; border-radius: 14px; overflow: hidden; display: grid; place-items: center; background-size: cover; background-position: center; }
+.hb-tile > span { font-family: var(--f-syne); font-weight: 800; font-size: 22px; }
+.hb-card-title { font-size: 17px; font-weight: 700; }
+.hb-card-sub { font-size: 14px; color: #B9B4CC; }
+.hb-tag { font-family: var(--f-mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: #8A849E; border: 1px solid rgba(245,243,255,.15); border-radius: 999px; padding: 2px 8px; }
+
+.hb-btn { min-height: 44px; min-width: 116px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 16px; border-radius: 999px; border: 1px solid rgba(245,243,255,.3); background: transparent; color: #F5F3FF; font-weight: 700; font-size: 14px; cursor: pointer; white-space: nowrap; transition: background .3s ease, color .3s ease; }
+.hb-root a.hb-btn { color: #F5F3FF; }
+.hb-root a.hb-btn:hover { color: #F5F3FF; border-color: #F5F3FF; }
+.hb-spinner { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(245,243,255,.25); animation: spin .7s linear infinite; }
+
+.hb-cta { min-height: 60px; padding: 0 34px; border-radius: 999px; border: 0; background: #FF4FD8; color: #07060B; font-weight: 700; font-size: 17px; cursor: pointer; display: inline-flex; align-items: center; transition: background .3s ease, color .3s ease; }
+.hb-cta:disabled { background: rgba(245,243,255,.08); color: #8A849E; cursor: not-allowed; }
+.hb-cta.is-live { animation: pulseBtn 2.4s infinite; }
+.hb-root a.hb-cta { color: #07060B; }
+.hb-root a.hb-cta:hover { color: #07060B; transform: scale(1.04); }
+.hb-ghost { min-height: 44px; padding: 0 18px; border: 0; background: transparent; color: #B9B4CC; font-size: 14px; font-weight: 600; cursor: pointer; }
+.hb-ghost:hover { color: #F5F3FF; }
+
+.hb-error { color: #FF8A8A; }

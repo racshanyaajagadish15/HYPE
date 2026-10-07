@@ -1,170 +1,107 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { HypeShell } from "../_components/HypeShell";
 
-type View = "recent" | "top" | "photos";
+type View = "recent" | "top";
+type Row = { key: string; img?: string; name: string; meta: string };
 
-export default function Home() {
+const TABS: { v: View; label: string; accent: string }[] = [
+  { v: "recent", label: "Recently played", accent: "#3DF5FF" },
+  { v: "top", label: "Top artists", accent: "#FF4FD8" },
+];
+
+export default function DataViewer() {
   const [view, setView] = useState<View>("recent");
-
-  return (
-    <div className="max-w-2xl mx-auto my-8 px-4 text-zinc-100">
-      <h1 className="text-xl font-semibold mb-4">Data Viewer</h1>
-      <nav className="flex gap-2 mb-4">
-        <button
-          onClick={() => setView("recent")}
-          className={`px-4 py-2 rounded ${view === "recent" ? "bg-green-500 text-black" : "bg-zinc-800"}`}
-        >
-          Recently Played
-        </button>
-        <button
-          onClick={() => setView("top")}
-          className={`px-4 py-2 rounded ${view === "top" ? "bg-green-500 text-black" : "bg-zinc-800"}`}
-        >
-          Top Artists
-        </button>
-        <button
-          onClick={() => setView("photos")}
-          className={`px-4 py-2 rounded ${view === "photos" ? "bg-green-500 text-black" : "bg-zinc-800"}`}
-        >
-          Photos
-        </button>
-        <Link href="/wrapped" className="px-4 py-2 rounded bg-zinc-800 hover:bg-zinc-700">
-          Wrapped
-        </Link>
-      </nav>
-
-      {view === "photos" ? <PhotosView /> : <SpotifyView view={view} />}
-    </div>
-  );
-}
-
-function SpotifyView({ view }: { view: "recent" | "top" }) {
-  const [items, setItems] = useState<any[]>([]);
+  const [rows, setRows] = useState<Row[]>([]);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  function pick(v: View) {
+    if (v === view) return;
+    setView(v);
     setLoading(true);
     setError("");
-    fetch(view === "recent" ? "/api/recently-played" : "/api/top-artists")
+  }
+
+  useEffect(() => {
+    fetch(view === "recent" ? "/api/recently-played" : "/api/top-artists", { cache: "no-store" })
       .then(async (res) => {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || res.statusText);
-        setItems(data.items);
+        setRows(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          data.items.map((item: any, i: number): Row => {
+            if (view === "recent") {
+              const t = item.track;
+              return {
+                key: `${t.id}-${i}`,
+                img: t.album.images[2]?.url ?? t.album.images[0]?.url,
+                name: t.name,
+                meta: `${t.artists.map((a: { name: string }) => a.name).join(", ")} · ${new Date(item.played_at).toLocaleString()}`,
+              };
+            }
+            return {
+              key: item.id,
+              img: item.images?.[2]?.url ?? item.images?.[0]?.url,
+              name: item.name,
+              meta: (item.genres ?? []).slice(0, 3).join(", ") || "No genres listed",
+            };
+          })
+        );
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [view]);
 
+  const accent = TABS.find((t) => t.v === view)!.accent;
+
   return (
-    <>
-      {loading && <p className="text-zinc-400">Loading...</p>}
-      {error && <p className="text-red-400">Error: {error}</p>}
+    <HypeShell ambient={view === "recent" ? "rgba(61,245,255,.16)" : "rgba(255,79,216,.16)"} nav="sound">
+      <div style={{ display: "flex", flexDirection: "column", gap: 28, animation: "rise .5s ease both" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <h1 className="hb-h1">Your <span className="hb-accent">sound</span></h1>
+          <p className="hb-lede">What HYPE sees from Spotify right now.</p>
+        </div>
 
-      <ul>
-        {items.map((item, i) => {
-          const track = view === "recent" ? item.track : null;
-          const img = view === "recent" ? track.album.images[2]?.url ?? track.album.images[0]?.url : item.images?.[2]?.url ?? item.images?.[0]?.url;
-          const name = view === "recent" ? track.name : item.name;
-          const meta =
-            view === "recent"
-              ? `${track.artists.map((a: any) => a.name).join(", ")} · ${new Date(item.played_at).toLocaleString()}`
-              : (item.genres ?? []).slice(0, 3).join(", ") || "no genres listed";
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {TABS.map((t) => {
+            const on = t.v === view;
+            return (
+              <button
+                key={t.v}
+                className="hb-btn"
+                onClick={() => pick(t.v)}
+                style={on ? { background: t.accent, borderColor: t.accent, color: "#07060B" } : undefined}
+              >
+                {t.label}
+              </button>
+            );
+          })}
+        </div>
 
-          return (
-            <li key={i} className="flex items-center gap-3 py-2 border-b border-zinc-800">
-              {img && <img src={img} alt="" className="w-12 h-12 rounded" />}
-              <div>
-                <div className="font-semibold">{name}</div>
-                <div className="text-sm text-zinc-400">{meta}</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {loading && (
+            <span className="hb-note" style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span className="hb-spinner" style={{ borderTopColor: accent }} /> Loading
+            </span>
+          )}
+          {error && <span className="hb-card-sub hb-error">{error}</span>}
+          {!loading &&
+            !error &&
+            rows.map((r) => (
+              <div key={r.key} className="hb-card" style={{ gridTemplateColumns: "52px minmax(0, 1fr)", padding: "12px 16px 12px 12px" }}>
+                <div className="hb-tile" style={{ background: r.img ? `url("${r.img}") center/cover` : `${accent}1A`, border: `1px solid ${accent}55` }}>
+                  {!r.img && <span style={{ color: accent }}>{r.name[0]}</span>}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}>
+                  <span className="hb-card-title" style={{ fontSize: 16, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.name}</span>
+                  <span className="hb-card-sub" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.meta}</span>
+                </div>
               </div>
-            </li>
-          );
-        })}
-      </ul>
-    </>
-  );
-}
-
-type PhotoItem = { id: string; mediaFile: { baseUrl: string; filename: string } };
-type Status = "idle" | "waiting" | "ready" | "error";
-
-function PhotosView() {
-  const [status, setStatus] = useState<Status>("idle");
-  const [items, setItems] = useState<PhotoItem[]>([]);
-  const [error, setError] = useState("");
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const pollRef = useRef<ReturnType<typeof setInterval>>();
-
-  useEffect(() => () => clearInterval(pollRef.current), []);
-
-  async function connect() {
-    setStatus("waiting");
-    setError("");
-    try {
-      const session = await fetch("/api/photos/session", { method: "POST" }).then((r) => r.json());
-      window.open(session.pickerUri, "_blank");
-
-      pollRef.current = setInterval(async () => {
-        const s = await fetch(`/api/photos/session/${session.id}`).then((r) => r.json());
-        if (s.mediaItemsSet) {
-          clearInterval(pollRef.current);
-          const { items } = await fetch(`/api/photos/items/${session.id}`).then((r) => r.json());
-          setItems(items);
-          setStatus("ready");
-        }
-      }, 3000);
-    } catch (err: any) {
-      setError(err.message);
-      setStatus("error");
-    }
-  }
-
-  function toggle(id: string) {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  }
-
-  if (status === "idle" || status === "error") {
-    return (
-      <div>
-        {error && <p className="text-red-400 mb-2">Error: {error}</p>}
-        <button onClick={connect} className="px-4 py-2 rounded bg-green-500 text-black">
-          Connect Google Photos
-        </button>
+            ))}
+        </div>
       </div>
-    );
-  }
-
-  if (status === "waiting") {
-    return <p className="text-zinc-400">A picker tab opened — choose your photos there, then come back here.</p>;
-  }
-
-  return (
-    <div>
-      <p className="text-sm text-zinc-400 mb-2">
-        {selected.size} of {items.length} selected
-      </p>
-      <div className="grid grid-cols-3 gap-2">
-        {items.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => toggle(item.id)}
-            className={`relative rounded overflow-hidden border-2 ${selected.has(item.id) ? "border-green-500" : "border-transparent"}`}
-          >
-            <img
-              src={`/api/photos/image?url=${encodeURIComponent(item.mediaFile.baseUrl)}&w=300`}
-              alt={item.mediaFile.filename}
-              className="w-full h-32 object-cover"
-            />
-          </button>
-        ))}
-      </div>
-    </div>
+    </HypeShell>
   );
 }

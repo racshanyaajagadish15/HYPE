@@ -24,10 +24,10 @@ export async function recordStory(month) {
     await page.goto(`${FRONTEND_ORIGIN}/wrapped/${month}/story`);
 
     // The page auto-advances through every slide on its own timer; wait for
-    // the final "That's a wrap!" screen instead of hardcoding a duration, so
-    // this works for any slide count.
-    await page.getByText("That's a wrap!").waitFor({ timeout: 120_000 });
-    await page.waitForTimeout(1500); // hold on the end screen briefly before cutting
+    // the final ticket screen instead of hardcoding a duration, so this works
+    // for any slide count.
+    await page.locator("[data-story-end]").waitFor({ timeout: 120_000 });
+    await page.waitForTimeout(3500); // let the ticket animate in before cutting
 
     const video = page.video();
     await context.close(); // finalizes the .webm file

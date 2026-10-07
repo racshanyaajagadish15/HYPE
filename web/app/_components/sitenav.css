@@ -1,0 +1,47 @@
+/* Site navigation — pill buttons in the HYPE style (from the Archive header). */
+
+.sn { position: relative; display: flex; align-items: center; gap: 8px; font-family: var(--font-space-grotesk), 'Space Grotesk', system-ui, sans-serif; }
+.sn .sn-pills { display: flex; align-items: center; gap: 8px; }
+
+.sn a.sn-pill,
+.sn button.sn-pill {
+  box-sizing: border-box; min-height: 40px; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px;
+  border-radius: 999px; border: 1px solid rgba(245,243,255,.22); background: rgba(7,6,11,.35); backdrop-filter: blur(8px);
+  color: #F5F3FF; font: 600 14px/1 inherit; font-family: inherit; white-space: nowrap; text-decoration: none; cursor: pointer;
+  transition: border-color .2s ease, box-shadow .2s ease, color .2s ease, transform .2s ease;
+}
+.sn a.sn-pill:hover,
+.sn button.sn-pill:hover { color: #F5F3FF; border-color: #FF4FD8; box-shadow: 0 0 20px rgba(255,79,216,.35); }
+.sn a.sn-pill[aria-current="page"] { border-color: #FF4FD8; color: #FF4FD8; }
+.sn a.sn-pill.sn-primary { background: #FF4FD8; border-color: #FF4FD8; color: #07060B; }
+.sn a.sn-pill.sn-primary:hover { color: #07060B; transform: scale(1.04); box-shadow: 0 0 24px rgba(255,79,216,.55); }
+
+.sn button.sn-burger { width: 40px; padding: 0; justify-content: center; font-size: 16px; }
+
+.sn .sn-panel {
+  position: absolute; right: 0; top: calc(100% + 8px); z-index: 50; width: 250px; max-width: calc(100vw - 32px); box-sizing: border-box;
+  display: flex; flex-direction: column; padding: 8px; border-radius: 18px; background: #100E18;
+  border: 1px solid rgba(245,243,255,.14); box-shadow: 0 24px 60px rgba(0,0,0,.7), 0 0 40px rgba(255,79,216,.18);
+  animation: snIn .18s ease both;
+}
+@keyframes snIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.sn .sn-panel a {
+  box-sizing: border-box; min-height: 44px; padding: 0 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  border-radius: 12px; color: #F5F3FF; font-weight: 600; font-size: 15px; text-decoration: none; white-space: nowrap;
+}
+.sn .sn-panel a:hover { background: rgba(255,79,216,.12); color: #F5F3FF; }
+.sn .sn-panel a[aria-current="page"] { color: #FF4FD8; }
+.sn .sn-panel a span { font-family: var(--font-dm-mono), 'DM Mono', monospace; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: #8A849E; }
+
+/* Wide screens: every page as a pill. Narrow: primary pill + menu.
+   (Selectors repeat .sn-pill so they outrank the pill's own display rule.) */
+.sn button.sn-pill.sn-burger, .sn .sn-pills.sn-pills-narrow { display: none; }
+@media (max-width: 760px) {
+  .sn .sn-pills.sn-pills-wide { display: none; }
+  .sn button.sn-pill.sn-burger { display: inline-flex; }
+  .sn .sn-pills.sn-pills-narrow { display: flex; }
+}
+/* Menu-only variant (e.g. inside the story player). */
+.sn.sn-menu-only .sn-pills.sn-pills-wide, .sn.sn-menu-only .sn-pills.sn-pills-narrow { display: none; }
+.sn.sn-menu-only button.sn-pill.sn-burger { display: inline-flex; border: 0; background: transparent; backdrop-filter: none; width: 44px; min-height: 44px; font-size: 18px; }
+.sn.sn-menu-only button.sn-pill.sn-burger:hover { box-shadow: none; color: #FF4FD8; }

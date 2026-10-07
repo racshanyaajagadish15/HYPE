@@ -1,4 +1,4 @@
-process.loadEnvFile(new URL("../.env", import.meta.url));
+import { saveEnvVar } from "../env.js";
 
 export async function getAccessToken() {
   const res = await fetch("https://oauth2.googleapis.com/token", {
@@ -11,7 +11,16 @@ export async function getAccessToken() {
       client_secret: process.env.GOOGLE_OAUTH_CLIENT_SECRET,
     }),
   });
-  if (!res.ok) throw new Error(`Refresh error ${res.status}: ${await res.text()}`);
+  if (!res.ok) {
+    const body = await res.text();
+    // A revoked/expired refresh token can't recover — drop it so the app
+    // shows the source as disconnected and the next Connect re-runs OAuth.
+    if (body.includes("invalid_grant")) {
+      saveEnvVar("GOOGLE_REFRESH_TOKEN", null);
+      throw new Error("Your Google login expired. Press Connect to sign in again.");
+    }
+    throw new Error(`Refresh error ${res.status}: ${body}`);
+  }
   return (await res.json()).access_token;
 }
 
